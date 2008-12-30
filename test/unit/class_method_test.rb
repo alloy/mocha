@@ -243,13 +243,23 @@ if defined?(MACRUBY_VERSION)
     
     def test_should_hide_original_method
       klass = Class.new
-      klass.class_eval("def self.method(method, withExtraArg: arg); end", __FILE__, __LINE__)
-      method = ClassMethod.new(klass, 'method:withExtraArg:')
+      klass.class_eval("def self.method(method, withExtraArg: arg, andAnotherArg: arg); end", __FILE__, __LINE__)
+      method = ClassMethod.new(klass, 'method:withExtraArg:andAnotherArg:')
       hidden_method_x = method.hidden_method
       
       method.hide_original_method
       
       assert klass.respond_to?(hidden_method_x)
+    end
+    
+    def test_should_remove_new_method
+      klass = Class.new
+      klass.class_eval("def self.method(method, withExtraArg: arg, andAnotherArg: arg); end", __FILE__, __LINE__)
+      method = ClassMethod.new(klass, 'method:withExtraArg:andAnotherArg:')
+      
+      method.remove_new_method
+      
+      assert_equal false, klass.respond_to?('method:withExtraArg:andAnotherArg:')
     end
     
   end
