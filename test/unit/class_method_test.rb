@@ -59,7 +59,7 @@ class ClassMethodTest < Test::Unit::TestCase
     hidden_method_x = method.hidden_method
     
     method.hide_original_method
-
+    
     assert klass.respond_to?(hidden_method_x)
   end
   
@@ -69,7 +69,7 @@ class ClassMethodTest < Test::Unit::TestCase
     hidden_method_x = method.hidden_method
     
     method.hide_original_method
-
+    
     assert klass.respond_to?(:original_method_name)
   end
   
@@ -79,7 +79,7 @@ class ClassMethodTest < Test::Unit::TestCase
     hidden_method_x = method.hidden_method
     
     method.hide_original_method
-
+    
     assert_equal false, klass.respond_to?(hidden_method_x)
   end
   
@@ -112,7 +112,7 @@ class ClassMethodTest < Test::Unit::TestCase
     method = ClassMethod.new(klass, :method_x)
     hidden_method_x = method.hidden_method.to_sym
     klass.define_instance_method(hidden_method_x) { :original_result }
-
+    
     method.remove_new_method
     method.restore_original_method
     
@@ -123,7 +123,7 @@ class ClassMethodTest < Test::Unit::TestCase
   def test_should_not_restore_original_method_if_hidden_method_is_not_defined
     klass = Class.new { def self.method_x; :new_result; end }
     method = ClassMethod.new(klass, :method_x)
-
+    
     method.restore_original_method
     
     assert_equal :new_result, klass.method_x
@@ -234,4 +234,23 @@ class ClassMethodTest < Test::Unit::TestCase
     assert class_method_1 == class_method_2
   end
   
+end
+
+if defined?(MACRUBY_VERSION)
+  class MacRubyClassMethodTest < Test::Unit::TestCase
+    
+    include Mocha
+    
+    def test_should_hide_original_method
+      klass = Class.new
+      klass.class_eval("def self.method(method, withExtraArg: arg); end", __FILE__, __LINE__)
+      method = ClassMethod.new(klass, 'method:withExtraArg:')
+      hidden_method_x = method.hidden_method
+      
+      method.hide_original_method
+      
+      assert klass.respond_to?(hidden_method_x)
+    end
+    
+  end
 end
