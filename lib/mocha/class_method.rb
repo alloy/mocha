@@ -105,7 +105,7 @@ module Mocha
       %{
         def #{signature}                                                            # def method(param0, withExtraParam: param1, &block)
           mocha.method_missing(                                                     #   mocha.method_missing(
-            '#{method}'.to_sym,                                                     #     'method:withExtraArg:'.to_sym,
+            '#{method}'.to_sym,                                                     #     'method:withExtraParam:'.to_sym,
             #{Array.new(parts.length + 1) { |index| "param#{index}" }.join(', ')},  #     param0, param1,
             &block)                                                                 #     &block)
         end                                                                         # end
