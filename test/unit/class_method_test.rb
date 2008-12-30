@@ -236,7 +236,7 @@ class ClassMethodTest < Test::Unit::TestCase
   
 end
 
-if defined?(MACRUBY_VERSION)
+if on_macruby?
   class MacRubyClassMethodTest < Test::Unit::TestCase
     
     include Mocha

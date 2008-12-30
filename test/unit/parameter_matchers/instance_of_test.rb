@@ -19,7 +19,7 @@ class InstanceOfTest < Test::Unit::TestCase
 
   def test_should_describe_matcher
     matcher = instance_of(String)
-    assert_equal "instance_of(#{ defined?(MACRUBY_VERSION) ? 'NSMutableString' : 'String' })", matcher.mocha_inspect
+    assert_equal "instance_of(#{ on_macruby? ? 'NSMutableString' : 'String' })", matcher.mocha_inspect
   end
 
 end
