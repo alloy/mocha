@@ -37,11 +37,16 @@ module Mocha
     end
     
     def define_new_method
-      stubbee.__metaclass__.class_eval(%{
-        def #{method}(*args, &block)
-          mocha.method_missing(:#{method}, *args, &block)
-        end
-      }, __FILE__, __LINE__)
+      body = if macruby_method?
+        macruby_method
+      else
+        %{
+          def #{method}(*args, &block)
+            mocha.method_missing(:#{method}, *args, &block)
+          end
+        }
+      end
+      stubbee.__metaclass__.class_eval(body, __FILE__, __LINE__)
     end
     
     def remove_new_method
@@ -84,6 +89,27 @@ module Mocha
       symbol = method.to_sym
       metaclass = stubbee.__metaclass__
       metaclass.public_method_defined?(symbol) || metaclass.protected_method_defined?(symbol) || metaclass.private_method_defined?(symbol)
+    end
+    
+    def macruby_method?
+      method.to_s.include?(':')
+    end
+    
+    def macruby_method
+      parts = method.to_s.split(':')
+      
+      signature = "#{parts.shift}(param0"
+      parts.each_with_index { |part, index| signature << ", #{part}: param#{index + 1}" }
+      signature << ", &block)"
+      
+      %{
+        def #{signature}                                                            # def method(param0, withExtraParam: param1, &block)
+          mocha.method_missing(                                                     #   mocha.method_missing(
+            '#{method}'.to_sym,                                                     #     'method:withExtraArg:'.to_sym,
+            #{Array.new(parts.length + 1) { |index| "param#{index}" }.join(', ')},  #     param0, param1,
+            &block)                                                                 #     &block)
+        end                                                                         # end
+      }
     end
     
   end

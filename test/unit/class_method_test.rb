@@ -245,11 +245,26 @@ if defined?(MACRUBY_VERSION)
       klass = Class.new
       klass.class_eval("def self.method(method, withExtraArg: arg, andAnotherArg: arg); end", __FILE__, __LINE__)
       method = ClassMethod.new(klass, 'method:withExtraArg:andAnotherArg:')
-      hidden_method_x = method.hidden_method
       
       method.hide_original_method
       
-      assert klass.respond_to?(hidden_method_x)
+      assert klass.respond_to?(method.hidden_method)
+    end
+    
+    def test_should_define_a_new_method_which_should_call_mocha_method_missing
+      klass = Class.new
+      klass.class_eval("def self.method(method, withExtraArg: arg, andAnotherArg: arg); end", __FILE__, __LINE__)
+      mocha = Mocha::Mock.new
+      klass.define_instance_method(:mocha) { mocha }
+      mocha.expects('method:withExtraArg:andAnotherArg:').with(:method, :param1, :param2).returns(:result)
+      method = ClassMethod.new(klass, 'method:withExtraArg:andAnotherArg:')
+      
+      method.hide_original_method
+      method.define_new_method
+      result = klass.send('method:withExtraArg:andAnotherArg:', :method, :param1, :param2)
+      
+      assert_equal :result, result
+      assert mocha.__verified__?
     end
     
     def test_should_remove_new_method
@@ -262,5 +277,18 @@ if defined?(MACRUBY_VERSION)
       assert_equal false, klass.respond_to?('method:withExtraArg:andAnotherArg:')
     end
     
+    def test_should_restore_original_method
+      klass = Class.new
+      klass.class_eval("def self.method(method, withExtraArg: arg, andAnotherArg: arg); :original_result; end", __FILE__, __LINE__)
+      method = ClassMethod.new(klass, 'method:withExtraArg:andAnotherArg:')
+      hidden_method = method.hidden_method.to_sym
+      
+      method.hide_original_method
+      method.remove_new_method
+      method.restore_original_method
+      
+      assert_equal :original_result, klass.send('method:withExtraArg:andAnotherArg:', :method, :param1, :param2)
+      assert_equal false, klass.respond_to?(hidden_method)
+    end
   end
 end
