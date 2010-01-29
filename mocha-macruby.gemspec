@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{mocha-macruby}
-  s.version = "0.9.8.20090918115329"
+  s.version = "0.9.8.20100129120100"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["James Mead", "Eloy Duran"]
