@@ -17,20 +17,31 @@ namespace 'test' do
   unit_tests = FileList['test/unit/**/*_test.rb']
   acceptance_tests = FileList['test/acceptance/*_test.rb']
 
+  # This is just a quick workaround a problem with the testtask in MacRuby
+  def macruby_run_tests(tests)
+    sh "macruby -I test -r #{tests.join(" -r ")} -e ''"
+  end
+
   desc "Run unit tests"
-  Rake::TestTask.new('units') do |t|
-    t.libs << 'test'
-    t.test_files = unit_tests
-    t.verbose = true
-    t.warning = true
+  # Rake::TestTask.new('units') do |t|
+  #   t.libs << 'test'
+  #   t.test_files = unit_tests
+  #   t.verbose = true
+  #   t.warning = true
+  # end
+  task :units do
+    macruby_run_tests unit_tests
   end
 
   desc "Run acceptance tests"
-  Rake::TestTask.new('acceptance') do |t|
-    t.libs << 'test'
-    t.test_files = acceptance_tests
-    t.verbose = true
-    t.warning = true
+  # Rake::TestTask.new('acceptance') do |t|
+  #   t.libs << 'test'
+  #   t.test_files = acceptance_tests
+  #   t.verbose = true
+  #   t.warning = true
+  # end
+  task :acceptance do
+    macruby_run_tests acceptance_tests
   end
   
   # require 'rcov/rcovtask'
