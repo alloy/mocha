@@ -15,6 +15,15 @@ module Mocha
           assertion_counter = AssertionCounter.new(self)
           result = '.'
           begin
+            @passed = nil
+            self.setup
+            self.__send__ name
+            mocha_verify(assertion_counter)
+            @passed = true
+          rescue Exception => e
+            @passed = false
+            result = runner.puke(self.class, name, self.class.translate_exception(e))
+          ensure
             begin
               @passed = nil
               self.setup
@@ -31,15 +40,13 @@ module Mocha
                 result = runner.puke(self.class, self.__name__, Mocha::Integration::MiniTest.translate(e))
               end
             end
-          ensure
-            mocha_teardown
           end
-          result
+        ensure
+          mocha_teardown
         end
+        result
       end
       
     end
-    
   end
-  
 end
