@@ -10,7 +10,7 @@ class ObjectInspectTest < Test::Unit::TestCase
       attr_accessor :attribute
     end
     object.attribute = 'instance_variable'
-    assert_match Regexp.new("^#<Object:0x[0-9A-Fa-f]{1,8}.*>$"), object.mocha_inspect
+    assert_match Regexp.new("^#<#{object.class}:0x[0-9A-Fa-f]{1,8}.*>$"), object.mocha_inspect
     assert_no_match(/instance_variable/, object.mocha_inspect)
   end
   
