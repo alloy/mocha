@@ -33,12 +33,12 @@ class IncludesTest < Test::Unit::TestCase
   end
   
   def test_should_not_raise_error_on_argument_that_does_not_respond_to_include
-    matcher = includes(:x)
-    assert_nothing_raised { matcher.matches?([:x]) }
+    matcher = includes(1)
+    assert_nothing_raised { matcher.matches?([1]) }
   end
   
   def test_should_not_match_on_argument_that_does_not_respond_to_include
-    matcher = includes(:x)
-    assert !matcher.matches?([:x])
+    matcher = includes(1)
+    assert !matcher.matches?([1])
   end
 end
