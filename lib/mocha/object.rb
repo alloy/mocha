@@ -51,7 +51,7 @@ class Object
   def expects(method_name_or_hash)
     expectation = nil
     mockery = Mocha::Mockery.instance
-    iterator = ArgumentIterator.new(method_name_or_hash)
+    iterator = Mocha::ArgumentIterator.new(method_name_or_hash)
     iterator.each { |*args|
       method_name = args.shift
       mockery.on_stubbing(self, method_name)
@@ -88,7 +88,7 @@ class Object
   def stubs(method_name_or_hash)
     expectation = nil
     mockery = Mocha::Mockery.instance
-    iterator = ArgumentIterator.new(method_name_or_hash)
+    iterator = Mocha::ArgumentIterator.new(method_name_or_hash)
     iterator.each { |*args|
       method_name = args.shift
       mockery.on_stubbing(self, method_name)
