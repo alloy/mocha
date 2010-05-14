@@ -53,16 +53,15 @@ class ClassMethodTest < Test::Unit::TestCase
     assert_match(/substituted_character_43/, method.hidden_method.to_s)
   end
   
-  # MacRuby bug: https://www.macruby.org/trac/ticket/715
-  # def test_should_hide_original_method
-  #   klass = Class.new { def self.method_x; end }
-  #   method = ClassMethod.new(klass, :method_x)
-  #   hidden_method_x = method.hidden_method
-  #   
-  #   method.hide_original_method
-  #   
-  #   assert klass.respond_to?(hidden_method_x)
-  # end
+  def test_should_hide_original_method
+    klass = Class.new { def self.method_x; end }
+    method = ClassMethod.new(klass, :method_x)
+    hidden_method_x = method.hidden_method
+    
+    method.hide_original_method
+    
+    assert klass.respond_to?(hidden_method_x)
+  end
   
   def test_should_respond_to_original_method_name_after_original_method_has_been_hidden
     klass = Class.new { def self.original_method_name; end }

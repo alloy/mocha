@@ -86,9 +86,7 @@ module Mocha
     end
     
     def method_exists?(method)
-      symbol = method.to_sym
-      metaclass = stubbee.__metaclass__
-      metaclass.public_method_defined?(symbol) || metaclass.protected_method_defined?(symbol) || metaclass.private_method_defined?(symbol)
+      stubbee.respond_to?(method, true)
     end
     
     def macruby_method?
