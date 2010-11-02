@@ -1,5 +1,5 @@
 require File.expand_path('../../test_helper', __FILE__)
-require 'mocha/mock'
+require 'mocha/mockery' # requires 'mock'
 require 'mocha/expectation_error'
 require 'set'
 require 'simple_counter'

@@ -42,7 +42,7 @@ module Mocha # :nodoc:
       iterator = ArgumentIterator.new(method_name_or_hash)
       iterator.each { |*args|
         method_name = args.shift
-        ensure_method_not_already_defined(method_name)
+        __define_stub_method__(method_name)
         expectation = Expectation.new(self, method_name, backtrace)
         expectation.returns(args.shift) if args.length > 0
         @expectations.add(expectation)
@@ -74,7 +74,7 @@ module Mocha # :nodoc:
       iterator = ArgumentIterator.new(method_name_or_hash)
       iterator.each { |*args|
         method_name = args.shift
-        ensure_method_not_already_defined(method_name)
+        __define_stub_method__(method_name)
         expectation = Expectation.new(self, method_name, backtrace)
         expectation.at_least(0)
         expectation.returns(args.shift) if args.length > 0
@@ -147,21 +147,11 @@ module Mocha # :nodoc:
 
     def stub_everything
       @everything_stubbed = true
+      ANCESTOR_INSTANCE_METHODS.each { |m| __define_stub_method__(m) }
     end
     
     def method_missing(symbol, *arguments, &block)
-      if @responder and not @responder.respond_to?(symbol)
-        raise NoMethodError, "undefined method `#{symbol}' for #{self.mocha_inspect} which responds like #{@responder.mocha_inspect}"
-      end
-      if matching_expectation_allowing_invocation = @expectations.match_allowing_invocation(symbol, *arguments)
-        matching_expectation_allowing_invocation.invoke(&block)
-      else
-        if (matching_expectation = @expectations.match(symbol, *arguments)) || (!matching_expectation && !@everything_stubbed)
-          message = UnexpectedInvocation.new(self, symbol, *arguments).to_s
-          message << Mockery.instance.mocha_inspect
-          raise ExpectationError.new(message, caller)
-        end
-      end
+      __match_invocation__(symbol, arguments, block)
     end
     
     def respond_to?(symbol, include_private = false)
@@ -187,10 +177,33 @@ module Mocha # :nodoc:
     def inspect
       mocha_inspect
     end
-    
-    def ensure_method_not_already_defined(method_name)
-      self.__metaclass__.send(:undef_method, method_name) if self.__metaclass__.method_defined?(method_name)
+
+    def __define_stub_method__(symbol)
+      __metaclass__.class_eval(%{
+        def #{symbol}(*args, &block)
+          __match_invocation__('#{symbol}'.to_sym, args, block)
+        end
+      })
     end
+
+    def __match_invocation__(symbol, arguments, block)
+      if @responder and not @responder.respond_to?(symbol)
+        raise NoMethodError, "undefined method `#{symbol}' for #{self.mocha_inspect} which responds like #{@responder.mocha_inspect}"
+      end
+      if matching_expectation_allowing_invocation = @expectations.match_allowing_invocation(symbol, *arguments)
+        matching_expectation_allowing_invocation.invoke(&block)
+      else
+        if (matching_expectation = @expectations.match(symbol, *arguments)) || (!matching_expectation && !@everything_stubbed)
+          message = UnexpectedInvocation.new(self, symbol, *arguments).to_s
+          message << Mockery.instance.mocha_inspect
+          raise ExpectationError.new(message, caller)
+        end
+      end
+    end
+
+    methods = instance_methods - instance_methods(false)
+    methods.delete(:object_id) unless RUBY_VERSION < '1.9'
+    ANCESTOR_INSTANCE_METHODS = methods.reject { |m| m =~ /^__.*__$/ }
 
     # :startdoc:
 

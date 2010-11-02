@@ -7,7 +7,10 @@ module Mocha
 end
 
 desc "Run all tests"
-task 'default' => ['test:units', 'test:acceptance', 'test:performance']
+task 'default' => 'test'
+
+desc "Run all tests"
+task 'test' => ['test:units', 'test:acceptance', 'test:performance']
 
 namespace 'test' do
   
