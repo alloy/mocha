@@ -179,11 +179,14 @@ module Mocha # :nodoc:
     end
 
     def __define_stub_method__(symbol)
+      verbose, $VERBOSE = $VERBOSE, nil
       __metaclass__.class_eval(%{
         def #{symbol}(*args, &block)
           __match_invocation__('#{symbol}'.to_sym, args, block)
         end
       })
+    ensure
+      $VERBOSE = verbose
     end
 
     def __match_invocation__(symbol, arguments, block)
